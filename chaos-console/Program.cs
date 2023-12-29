@@ -1,13 +1,14 @@
-﻿using System.Reflection;
-using System.Text;
+﻿using System.Text;
+using System.Reflection;
 namespace ChaosConsole {
     internal class Program {
         public static string scriptFileSourceFromMainDirectory = "AntiCrash";
-        public static string unrecognizedInput = "Input not recognized.";
+        public static string unrecognizedInput = "ERROR 1: input not recognized.";
         public static string directoryCommand = "../net8.0";
         public static string publicUserInput = "AntiCrash";
         public static string userStatus = "guest";
         public static string prefix = "";
+        public static bool loggedInWithAdminPerms = false;
         public static bool runningScript = false;
         public static string[] nullArray = [
             "nullArrayType"
@@ -17,21 +18,27 @@ namespace ChaosConsole {
         ];
             public static string[] cmdCommandNames = [
                 "cmd", "RUN", "CLR", "RST", "ESC"
+                //      WIP   done   done   done
             ];
             public static string[] fleCommandNames = [
-                "fle", "CRT", "OPN", "HEX", "WRT"
+                "fle", "CRT", "OPN", "HEX", "WRT", "DEL"
+                //     done   done    WIP    WIP    WIP
             ];
             public static string[] dirCommandNames = [
-                "dir", "CRT", "SET", "RTN", "RST"
+                "dir", "CRT", "SET", "RTN", "RST", "MOV"
+                //     done   done   done   done    WIP
             ];
             public static string[] admCommandNames = [
                 "adm", "CRT", "LOG", "LGT", "DEL"
+                //      WIP    WIP    WIP    WIP
             ];
             public static string[] rtnCommandNames = [
                 "rtn", "DIR"
+                //     done
             ];
             public static string[] hlpCommandNames = [
-                "hlp", "DOC"
+                "hlp", "DOC", "ERR"
+                //     done
             ];
         static void Main(string[] args) {
             ArgumentNullException.ThrowIfNull(args);
@@ -63,17 +70,7 @@ namespace ChaosConsole {
                     if (!(temporaryVar[0] == "nullArrayType")) {
                         primaryCommandIndex = Array.FindIndex(primaryCommandNames, row => row == (temporaryVar[0]).ToUpper()[..3]);
                         interpretInputValue = InterpretAndProcessInput(primaryCommandIndex - 1, subCommandIndex - 1);
-                        if (interpretInputValue == 0) {
-                            WriteToConsole(true, true, unrecognizedInput);
-                        } else {
-                            if (interpretInputValue == 1) {
-                                WriteToConsole(true, true, "Action failed due to an error.");
-                            } else {
-                                if (!(interpretInputValue == 2)) {
-                                    WriteToConsole(true, true, "Lmao how did you even do that.");
-                                }
-                            }
-                        }
+                        ReturnErrorCode(interpretInputValue);
                     } else {
                         WriteToConsole(true, true, unrecognizedInput);
                     }
@@ -188,11 +185,11 @@ namespace ChaosConsole {
                 if (subArrayIndex == 2) {
                     Console.Clear();
                     Main(nullArray);
-                    return 1;
+                    return 7;
                 }
                 if (subArrayIndex == 3) {
                     System.Environment.Exit(0);
-                    return 1;
+                    return 7;
                 }
                 return 0;
             }
@@ -202,7 +199,7 @@ namespace ChaosConsole {
                         File.Create(directoryCommand + "/" + publicUserInput).Dispose();
                         return 2;
                     }
-                    return 1;
+                    return 6;
                 }
                 if (subArrayIndex == 1) {
                     if (ValidateFileName(publicUserInput) && File.Exists(directoryCommand + "/" + publicUserInput)) {
@@ -211,7 +208,7 @@ namespace ChaosConsole {
                         sr.Close();
                         return 2;
                     }
-                    return 1;
+                    return 5;
                 }
                 return 0;
             }
@@ -221,7 +218,7 @@ namespace ChaosConsole {
                         Directory.CreateDirectory(publicUserInput);
                         return 2;
                     }
-                    return 1;
+                    return 4;
                 }
                 if (subArrayIndex == 1) {
                     if (Directory.Exists(publicUserInput)) {
@@ -231,7 +228,7 @@ namespace ChaosConsole {
                         directoryCommand = publicUserInput;
                         return 2;
                     }
-                    return 1;
+                    return 3;
                 }
                 if (subArrayIndex == 2) {
                     string? temporaryDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -287,11 +284,92 @@ namespace ChaosConsole {
                     WriteToConsole(false, true, "   DIR (return directory in which the console file is in)");
                     WriteToConsole(false, true, "HLP (help)");
                     WriteToConsole(false, true, "   DOC (documentation)");
+                    WriteToConsole(false, true, "   ERR (describes error and how to fix it)");
                     return 2;
+                }
+                if (subArrayIndex == 1) {
+                    if (publicUserInput.Length >= 1)
+                    {
+                        return HelpError();
+                    }
+                    return 1;
                 }
                 return 0;
             }
             return -3;
+        }
+        static void ReturnErrorCode(int erNum) {
+            if (erNum != 2) {
+                if (erNum == 0) {
+                    WriteToConsole(true, true, unrecognizedInput);
+                } else {
+                    if (erNum == 1) {
+                        WriteToConsole(true, true, "ERROR 0: action failed.");
+                    } else {
+                        if (erNum == -3) {
+                            WriteToConsole(true, true, "ERROR 5: lmao how did you even do that.");
+                        } else {
+                            if (erNum == 3) {
+                                WriteToConsole(true, true, "ERROR 2: directory does not exist.");
+                            } else {
+                                if (erNum == 4) {
+                                    WriteToConsole(true, true, "ERROR 3: directory already exists.");
+                                } else {
+                                    if (erNum == 5) {
+                                        WriteToConsole(true, true, "ERROR 4: file naming error.");
+                                    } else {
+                                        if (erNum == 6) {
+                                            WriteToConsole(true, true, "ERROR 6: file could not be found.");
+                                        } else {
+                                            if (erNum == 7) {
+                                                WriteToConsole(true, true, "ERROR 7:");
+                                            } else {
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        static int HelpError() {
+            if (publicUserInput == "0") {
+                WriteToConsole(true, true, "ERROR 0: an unkown error, more error codes are being added with every new version");
+                return 2;
+            }
+            if (publicUserInput == "1") {
+                WriteToConsole(true, false, "ERROR 1: your input was not recognized due to improper or wrong syntax. Use the \"hlp doc\" command for a list of commands. ");
+                WriteToConsole(false, true, "Caps do not matter, however the names of the commands have to match exactly. Some commands require an additional input at the end.");
+                return 2;
+            }
+            if (publicUserInput == "5") {
+                WriteToConsole(true, true, "ERROR 5: how tf did you get that lmao it should be impossible. Actually please explain how that happened.");
+                return 2;
+            }
+            if (publicUserInput == "2") {
+                WriteToConsole(true, true, "ERROR 2: the directory you are looking for could not be found from the source directory.");
+                return 2;
+            }
+            if (publicUserInput == "3") {
+                WriteToConsole(true, true, "ERROR 3: the directory you are trying to create already exists.");
+                return 2;
+            }
+            if (publicUserInput == "4") {
+                WriteToConsole(true, true, "ERROR 4: file name was invalid due to special characters or file already exists.");
+                return 2;
+            }
+            if (publicUserInput == "6") {
+                WriteToConsole(true, true, "ERROR 6: file name was invalid due to special characters or file does not exist in the current directory.");
+                return 2;
+            }
+            if (publicUserInput == "7") {
+                WriteToConsole(true, true, "ERROR 7: app did not close or reset.");
+                return 2;
+            }
+            return 0;
         }
         static string[] RecievePrimaryInputInteger(int index) {
             if (!(index == -1) && !(index == -2)) {
