@@ -13,8 +13,4 @@
     <Content Include="console.ico" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Assets\" />
-  </ItemGroup>
-
 </Project>
