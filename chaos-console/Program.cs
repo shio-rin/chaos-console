@@ -70,7 +70,9 @@ namespace ChaosConsole {
                     if (!(temporaryVar[0] == "nullArrayType")) {
                         primaryCommandIndex = Array.FindIndex(primaryCommandNames, row => row == (temporaryVar[0]).ToUpper()[..3]);
                         interpretInputValue = InterpretAndProcessInput(primaryCommandIndex - 1, subCommandIndex - 1);
-                        ReturnErrorCode(interpretInputValue);
+                        if (ReturnErrorCode(interpretInputValue, true) == "errorDoesNotExist") {
+                            ReturnErrorCode(8, false);
+                        }
                     } else {
                         WriteToConsole(true, true, unrecognizedInput);
                     }
@@ -298,42 +300,48 @@ namespace ChaosConsole {
             }
             return -3;
         }
-        static void ReturnErrorCode(int erNum) {
+        static string ReturnErrorCode(int erNum, bool uSP) {
             if (erNum != 2) {
                 if (erNum == 0) {
-                    WriteToConsole(true, true, unrecognizedInput);
-                } else {
-                    if (erNum == 1) {
-                        WriteToConsole(true, true, "ERROR 0: action failed.");
-                    } else {
-                        if (erNum == -3) {
-                            WriteToConsole(true, true, "ERROR 5: lmao how did you even do that.");
-                        } else {
-                            if (erNum == 3) {
-                                WriteToConsole(true, true, "ERROR 2: directory does not exist.");
-                            } else {
-                                if (erNum == 4) {
-                                    WriteToConsole(true, true, "ERROR 3: directory already exists.");
-                                } else {
-                                    if (erNum == 5) {
-                                        WriteToConsole(true, true, "ERROR 4: file naming error.");
-                                    } else {
-                                        if (erNum == 6) {
-                                            WriteToConsole(true, true, "ERROR 6: file could not be found.");
-                                        } else {
-                                            if (erNum == 7) {
-                                                WriteToConsole(true, true, "ERROR 7:");
-                                            } else {
-
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    WriteToConsole(uSP, true, unrecognizedInput);
+                    return "";
                 }
+                if (erNum == 1) {
+                    WriteToConsole(uSP, true, "ERROR 0: action failed.");
+                    return "";
+                }
+                if (erNum == -3) {
+                    WriteToConsole(uSP, true, "ERROR 5: lmao how did you even do that.");
+                    return "";
+                }
+                if (erNum == 3) {
+                    WriteToConsole(uSP, true, "ERROR 2: directory does not exist.");
+                    return "";
+                }
+                if (erNum == 4) {
+                    WriteToConsole(uSP, true, "ERROR 3: directory already exists.");
+                    return "";
+                }
+                if (erNum == 5) {
+                    WriteToConsole(uSP, true, "ERROR 4: file naming error.");
+                    return "";
+                }
+                if (erNum == 6) {
+                    WriteToConsole(uSP, true, "ERROR 6: file could not be found.");
+                    return "";
+                }
+                if (erNum == 7) {
+                    WriteToConsole(uSP, true, "ERROR 7:");
+                    return "";
+                }
+                if (erNum == 8) {
+                    WriteToConsole(uSP, true, "ERROR 8: error code not recognized.");
+                    return "";
+                }
+                WriteToConsole(uSP, true, "ERROR 8: error code not recognized.");
+                return "errorDoesNotExist";
             }
+            return "erNum==2";
         }
         static int HelpError() {
             if (publicUserInput == "0") {
@@ -367,6 +375,10 @@ namespace ChaosConsole {
             }
             if (publicUserInput == "7") {
                 WriteToConsole(true, true, "ERROR 7: app did not close or reset.");
+                return 2;
+            }
+            if (publicUserInput == "8") {
+                WriteToConsole(true, true, "ERROR 8: error message could not be loaded due to error code not found. This error does not have a fix.");
                 return 2;
             }
             return 0;
