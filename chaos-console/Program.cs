@@ -1,11 +1,18 @@
-﻿using System.Text;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Text;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.IO.Compression;
 namespace ChaosConsole {
     internal class Program {
         public static string scriptFileSourceFromMainDirectory = "AntiCrash";
         public static string unrecognizedInput = "ERROR 1: input not recognized.";
         public static string directoryCommand = "../net8.0";
         public static string publicUserInput = "AntiCrash";
+        public static string prevPatchFileName = "dat.img";
+        public static string dataFileName = ".dat";
         public static string userStatus = "guest";
         public static string prefix = "";
         public static bool loggedInWithAdminPerms = false;
@@ -38,7 +45,7 @@ namespace ChaosConsole {
             ];
             public static string[] hlpCommandNames = [
                 "hlp", "DOC", "ERR"
-                //     done
+                //     done   done
             ];
         static void Main(string[] args) {
             ArgumentNullException.ThrowIfNull(args);
@@ -51,6 +58,19 @@ namespace ChaosConsole {
             int primaryCommandIndex;
             int subCommandIndex;
             string date = DateTime.Today.ToString()[..^12];
+            if (!File.Exists(dataFileName)) {
+                if (File.Exists (prevPatchFileName)) {
+                    File.Move(prevPatchFileName, dataFileName);
+                } else {
+                    File.Create(dataFileName).Dispose();
+                }
+            }
+            File.WriteAllBytes(dataFileName, EncodeString("DATA!=" +
+                "adminX?[y]!=" +
+                "usrNme!='enty'" +
+                "psWrd!='test'" +
+                "savingHistoryX?[n]!=[n]" +
+                "delX?[]!="));
             WriteToConsole(true, true, "chaos-eaters " + date + " Konstantin Edunov");
             WriteToConsole(false, true, "type \"hlp doc\" for a list of all commands");
             WriteToConsole(false, true, "type \"cmd esc\" to exit");
@@ -121,9 +141,10 @@ namespace ChaosConsole {
                     return privateHiddenUserInput;
                 }
                 return "";
-            }
-            if (blScript) {
-                Console.ForegroundColor = ConsoleColor.DarkMagenta;
+            } else {
+                if (enteringHiddenData) {
+                    Console.ForegroundColor = ConsoleColor.DarkMagenta;
+                }
             }
             string? privateUserInput = Console.ReadLine();
             if (!(privateUserInput == null)) {
@@ -247,7 +268,9 @@ namespace ChaosConsole {
                 return 0;
             }
             if (primaryArrayIndex == 3) {
-
+                if (subArrayIndex == 0) {
+                    
+                }
                 return 0;
             }
             if (primaryArrayIndex == 4) {
@@ -411,6 +434,28 @@ namespace ChaosConsole {
                 return false;
             }
             return true;
+        }
+        static byte[] EncodeString(string contents) {
+            char[] arrayX1 = contents.ToCharArray();
+            Array.Reverse(arrayX1, 0, arrayX1.Length);
+            string contentsReversed = new(arrayX1);
+            char[] arrayX2 = Convert.ToBase64String(Encoding.UTF8.GetBytes(contentsReversed)).ToCharArray();
+            Array.Reverse(arrayX2, 0, arrayX2.Length);
+            byte[] bytes = Encoding.UTF8.GetBytes(new string(arrayX2));
+            string hexString = Convert.ToHexString(Encoding.UTF8.GetBytes(Convert.ToBase64String(Encoding.UTF8.GetBytes(Convert.ToHexString(bytes)))));
+            return Encoding.UTF8.GetBytes(hexString);
+        }
+        static string DecodeString(byte[] bytes) {
+            byte[] contents = bytes;
+            Array.Reverse(contents);
+            char[] array = Encoding.UTF8.GetString(contents).ToCharArray();
+            Array.Reverse(array);
+            string? stringContents = Encoding.UTF8.GetString(Convert.FromBase64String(new(array)));
+            if (stringContents != null) {
+                return stringContents;
+            } else {
+                return "null";
+            }
         }
     }
 }
