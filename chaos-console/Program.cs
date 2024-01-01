@@ -65,12 +65,7 @@ namespace ChaosConsole {
                     File.Create(dataFileName).Dispose();
                 }
             }
-            File.WriteAllBytes(dataFileName, EncodeString("DATA!=" +
-                "adminX?[y]!=" +
-                "usrNme!='enty'" +
-                "psWrd!='test'" +
-                "savingHistoryX?[n]!=[n]" +
-                "delX?[]!="));
+            File.WriteAllBytes(dataFileName, EncodeString(""));
             WriteToConsole(true, true, "chaos-eaters " + date + " Konstantin Edunov");
             WriteToConsole(false, true, "type \"hlp doc\" for a list of all commands");
             WriteToConsole(false, true, "type \"cmd esc\" to exit");
